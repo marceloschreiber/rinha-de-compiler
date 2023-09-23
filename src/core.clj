@@ -1,7 +1,7 @@
 (ns core
-  (:require [cheshire.core :as json]
-            [clojure.java.shell :as sh])
-  (:refer-clojure :exclude [eval]))
+  (:require [cheshire.core :as json])
+  (:refer-clojure :exclude [eval])
+  (:gen-class))
 
 (def global-env {"Add" +
                  "Sub" -
@@ -14,13 +14,6 @@
                  "Gt" >
                  "Lte" <=
                  "Gte" >=})
-
-(defn ast
-  [file]
-  (-> (sh/sh "rinha" file)
-      :out
-      (json/parse-string keyword)
-      :expression))
 
 (declare eval)
 
@@ -67,5 +60,23 @@
                (recur (:body callee)
                       (merge env (zipmap (:parameters callee) arguments)))))))
 
-(let [expression (ast "resources/sum.rinha")]
-  (eval expression global-env))
+(defn -main [& _args]
+  (-> "/var/rinha/source.rinha.json"
+      slurp
+      (json/parse-string keyword)
+      :expression
+      (eval global-env)))
+
+(comment
+  (require '[clojure.java.shell :as sh])
+
+  (defn ast
+    [file]
+    (-> (sh/sh "rinha" file)
+        :out
+        (json/parse-string keyword)
+        :expression))
+
+  (let [expression (ast "resources/sum.rinha")]
+    (eval expression global-env))
+  #())
