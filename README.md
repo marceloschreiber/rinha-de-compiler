@@ -14,4 +14,14 @@ clj -M -m core
 
 ## Docker
 
-Fazendo, nem tenho Docker instalado.
+Criar a imagem:
+
+```shell
+docker build . -t marcelo-clojure-rinha
+```
+
+rodar passando o arquivo como um volume:
+
+```shell
+docker run -v ./resources/fib.rinha.json:/var/rinha/source.rinha.json marcelo-clojure-rinha
+```
