@@ -1,6 +1,7 @@
 (ns core
   (:require [cheshire.core :as json]
-            [clojure.java.shell :as sh]))
+            [clojure.java.shell :as sh])
+  (:refer-clojure :exclude [eval]))
 
 (def global-env {"Add" +
                  "Sub" -
@@ -21,21 +22,21 @@
       (json/parse-string keyword)
       :expression))
 
-(declare my-eval)
+(declare eval)
 
 (defn get-params
   [expression env]
-  (list (or (some-> expression :lhs (my-eval env))
-            (some-> expression :first (my-eval env)))
-        (or (some-> expression :rhs (my-eval env))
-            (some-> expression :second (my-eval env)))))
+  [(or (some-> expression :lhs (eval env))
+       (some-> expression :first (eval env)))
+   (or (some-> expression :rhs (eval env))
+       (some-> expression :second (eval env)))])
 
-(defn my-eval
+(defn eval
   [expression env]
   (case (:kind expression)
-    "Print"  (let [value (my-eval (:value expression) env)]
+    "Print"  (let [value (eval (:value expression) env)]
                (println (cond
-                          (list? value) (format "(%s, %s)" (first value) (second value))
+                          (coll? value) (format "(%s, %s)" (first value) (second value))
                           (map? value) "<#closure>"
                           :else value))
                value)
@@ -48,26 +49,21 @@
     "Int" (:value expression)
     "Str" (:value expression)
     "Tuple" (get-params expression env)
-    "If" (if (my-eval (:condition expression) env)
-           (my-eval (:then expression) env)
-           (my-eval (:otherwise expression) env))
-    "First" (let [[first] (get-params (:value expression) env)]
-              first)
-    "Second" (let [[_, second] (get-params (:value expression) env)]
-               second)
-    "Let" (my-eval (:next expression)
-                   (assoc env
-                          (-> expression :name :text)
-                          (my-eval (:value expression) env)))
+    "If" (eval (if (eval (:condition expression) env)
+                 (:then expression)
+                 (:otherwise expression))
+               env)
+    "First" (first (get-params (:value expression) env))
+    "Second" (second (get-params (:value expression) env))
+    "Let" (eval (:next expression)
+                (assoc env (-> expression :name :text) (eval (:value expression) env)))
     "Var" (get env (:text expression))
     "Function" {:parameters (map :text (:parameters expression))
                 :body       (:value expression)}
-    "Call" (let [callee    (my-eval (:callee expression) env)
-                 arguments (map #(my-eval % env) (:arguments expression))]
-             (my-eval
-              (:body callee)
-              (merge env
-                     (into {} (zipmap (:parameters callee) arguments)))))))
+    "Call" (let [callee    (eval (:callee expression) env)
+                 arguments (map #(eval % env) (:arguments expression))]
+             (eval (:body callee)
+                   (merge env (zipmap (:parameters callee) arguments))))))
 
-(let [expression (ast "resources/combination.rinha")]
-  (my-eval expression global-env))
+(let [expression (ast "resources/tuple.rinha")]
+  (eval expression global-env))
