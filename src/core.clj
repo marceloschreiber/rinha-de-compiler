@@ -39,6 +39,9 @@
                  (case (:op expression)
                    "And" (and lhs rhs)
                    "Or" (or lhs rhs)
+                   "Add" (if (and (number? lhs) (number? rhs))
+                           (+ lhs rhs)
+                           (str lhs rhs))
                    ((get env (:op expression)) lhs rhs)))
       "Bool" (:value expression)
       "Int" (:value expression)
@@ -77,6 +80,6 @@
         (json/parse-string keyword)
         :expression))
 
-  (let [expression (ast "resources/sum.rinha")]
+  (let [expression (ast "resources/string_number.rinha")]
     (eval expression global-env))
   #())
