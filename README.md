@@ -23,5 +23,5 @@ docker build . -t marcelo-clojure-rinha
 rodar passando o arquivo como um volume:
 
 ```shell
-docker run -v ./resources/fib.rinha.json:/var/rinha/source.rinha.json marcelo-clojure-rinha
+docker run -m 2g --cpus 2 -v ./resources/fib.rinha.json:/var/rinha/source.rinha.json marcelo-clojure-rinha
 ```
