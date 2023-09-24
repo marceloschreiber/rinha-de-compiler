@@ -1,1 +1,1 @@
-second((1, 2))
+print(second((1, 2)))

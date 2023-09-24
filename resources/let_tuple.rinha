@@ -1,0 +1,2 @@
+let my_tuple = (1, 2);
+print(first(my_tuple))

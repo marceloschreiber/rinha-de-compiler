@@ -3,8 +3,7 @@
   (:refer-clojure :exclude [eval])
   (:gen-class))
 
-(def global-env {"Add" +
-                 "Sub" -
+(def global-env {"Sub" -
                  "Mul" *
                  "Div" /
                  "Rem" rem
@@ -51,8 +50,8 @@
                     (:then expression)
                     (:otherwise expression))
                   env)
-      "First" (first (get-params (:value expression) env))
-      "Second" (second (get-params (:value expression) env))
+      "First"  (first (eval (:value expression) env))
+      "Second" (second (eval (:value expression) env))
       "Let" (recur (:next expression)
                    (assoc env (-> expression :name :text) (eval (:value expression) env)))
       "Var" (get env (:text expression))
@@ -80,6 +79,6 @@
         (json/parse-string keyword)
         :expression))
 
-  (let [expression (ast "resources/string_number.rinha")]
+  (let [expression (ast "resources/let_tuple.rinha")]
     (eval expression global-env))
   #())
