@@ -5,7 +5,6 @@
 
 (def global-env {"Sub" -
                  "Mul" *
-                 "Div" /
                  "Rem" rem
                  "Eq" =
                  "Neq" not=
@@ -41,6 +40,7 @@
                    "Add" (if (and (number? lhs) (number? rhs))
                            (+ lhs rhs)
                            (str lhs rhs))
+                   "Div" (Math/floorDiv lhs rhs)
                    ((get env (:op expression)) lhs rhs)))
       "Bool" (:value expression)
       "Int" (:value expression)
@@ -79,6 +79,6 @@
         (json/parse-string keyword)
         :expression))
 
-  (let [expression (ast "resources/let_tuple.rinha")]
+  (let [expression (ast "resources/div.rinha")]
     (eval expression global-env))
   #())
