@@ -3,8 +3,8 @@
   (:refer-clojure :exclude [eval])
   (:gen-class))
 
-(def global-env {"Sub" -
-                 "Mul" *
+(def global-env {"Sub" -'
+                 "Mul" *'
                  "Rem" rem
                  "Eq" =
                  "Neq" not=
@@ -38,7 +38,7 @@
                    "And" (and lhs rhs)
                    "Or" (or lhs rhs)
                    "Add" (if (and (number? lhs) (number? rhs))
-                           (+ lhs rhs)
+                           (+' lhs rhs)
                            (str lhs rhs))
                    "Div" (Math/floorDiv lhs rhs)
                    ((get env (:op expression)) lhs rhs)))
@@ -79,6 +79,6 @@
         (json/parse-string keyword)
         :expression))
 
-  (let [expression (ast "resources/div.rinha")]
+  (let [expression (ast "resources/discord.rinha")]
     (eval expression global-env))
   #())
